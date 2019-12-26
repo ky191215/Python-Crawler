@@ -21,10 +21,10 @@ class Crawler(object):
         
         # DONE: crawl the page
         while True:
-            results_buffer, last_date = self.crawl_page(start_date, end_date, page=f'&no={page_num}')
+            results_buffer, end_crawl = self.crawl_page(start_date, end_date, page=f'&no={page_num}')
             page_num += 10
             results += results_buffer
-            if last_date < end_date:
+            if end_crawl:
                 break
         
         return results
@@ -56,15 +56,16 @@ class Crawler(object):
         rel_urls = root.xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/div/table/tbody/tr/td[2]/a/@href')
 
         # Each element of results contains a list of the post date, the title and the content
-        # ex:[['date1', 'title1', 'content1'], ['date2', 'title2', 'content2'], ['date3', 'title3', 'content3']
+        # ex:[['date1', 'title1', 'content1'], ['date2', 'title2', 'content2'], ['date3', 'title3', 'content3']]
         results = list()
-        last_date = datetime.strptime(post_dates[0], '%Y-%m-%d')
+        end_crawl = False
         
         for rel_url, date, title in zip(rel_urls, post_dates, titles):
             # Check the post date exceeds the end date or not
             temp_date = datetime.strptime(date, '%Y-%m-%d')
-            if end_date < temp_date:
-                last_date = datetime.strptime(date, '%Y-%m-%d')
+            if temp_date > start_date:
+                continue
+            if end_date <= temp_date :
 
                 result = list()
                 result.append(date)
@@ -78,9 +79,10 @@ class Crawler(object):
                 results.append(result)
                 
             else:
+                end_crawl = True
                 break
         
-        return results, last_date
+        return results, end_crawl
     
     def crawl_content(self, url):
         """Crawl the content of given url
@@ -96,6 +98,7 @@ class Crawler(object):
         content = list()
         # Complete below
         # TODO: recursively find all the text in <div class="editor content"> and add them to the content
+
         '''
         base_path = '/html/body/div[1]/div/div[2]/div/div/div[2]/div/div[2]'
         for in:
