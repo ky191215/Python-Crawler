@@ -66,18 +66,15 @@ class Crawler(object):
             if temp_date > start_date:
                 continue
             if end_date <= temp_date :
-
                 result = list()
                 result.append(date)
                 result.append(title)
 
                 url = self.base_url + rel_url
-                result.append(url)
-                # TODO: substitue the previous line when the crawl_content function is done
-                #content = self.crawl_content(url) 
-                #result.append(content)
+                content = self.crawl_content(url) 
+                result.append(content)
+
                 results.append(result)
-                
             else:
                 end_crawl = True
                 break
@@ -95,15 +92,9 @@ class Crawler(object):
         res = requests.get(url).content.decode()
         root = etree.HTML(res)
 
-        content = list()
-        # Complete below
-        # TODO: recursively find all the text in <div class="editor content"> and add them to the content
-
-        '''
-        base_path = '/html/body/div[1]/div/div[2]/div/div/div[2]/div/div[2]'
-        for in:
-            path = base_path + 
-            content += root.xpath(path)
-        '''
+        # DONE: find all the text in <div class="editor content"> and add them to the content
+        content_list = root.xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/div/div[2]//text()')
+        content = ' '.join(content_list) #transform the format of content from list to string
+        content = content.replace('\xa0',' ')
         return content
     
